@@ -25,7 +25,7 @@ import type { Setlist, SetlistSong, Song, Venue } from '../types'
 export function SetlistDetail() {
   const { id } = useParams<{ id: string }>()
   const { play: spotifyPlay, connection } = useSpotify()
-  const { openPanel: openMetronome } = useMetronome()
+  const { openPanel: openMetronome, startWithDuration, stop: stopMetronome, isPlaying: metronomeIsPlaying } = useMetronome()
   const [setlist, setSetlist] = useState<Setlist | null>(null)
   const [venues, setVenues] = useState<Venue[]>([])
   const [items, setItems] = useState<SetlistSong[]>([])
@@ -34,6 +34,8 @@ export function SetlistDetail() {
   const [name, setName] = useState('')
   const [showAddSong, setShowAddSong] = useState(false)
   const [songSearch, setSongSearch] = useState('')
+  const [practiceMode, setPracticeMode] = useState(false)
+  const [practiceIndex, setPracticeIndex] = useState(0)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -116,6 +118,38 @@ export function SetlistDetail() {
     setShowAddSong(true)
   }
 
+  function startPractice(index: number) {
+    const song = items[index]?.song
+    if (!song) return
+    setPracticeMode(true)
+    setPracticeIndex(index)
+    if (song.bpm && song.duration) {
+      startWithDuration(song.bpm, song.duration)
+    } else if (song.bpm) {
+      openMetronome(song.bpm)
+    }
+  }
+
+  function practiceNext() {
+    if (practiceIndex < items.length - 1) {
+      startPractice(practiceIndex + 1)
+    } else {
+      stopMetronome()
+      setPracticeMode(false)
+    }
+  }
+
+  function practicePrev() {
+    if (practiceIndex > 0) {
+      startPractice(practiceIndex - 1)
+    }
+  }
+
+  function exitPractice() {
+    stopMetronome()
+    setPracticeMode(false)
+  }
+
   const totalDuration = items.reduce((sum, i) => sum + (i.song?.duration ?? 0), 0)
   const existingSongIds = new Set(items.map((i) => i.song_id))
   const availableSongs = allSongs
@@ -132,6 +166,36 @@ export function SetlistDetail() {
 
   return (
     <div>
+      {practiceMode && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-amber-400/30 bg-amber-400/5 px-4 py-2.5">
+          <span className="text-xs font-medium text-amber-400">Practice</span>
+          <span className="flex-1 truncate text-sm text-text-primary">
+            {items[practiceIndex]?.song?.title ?? '—'}
+          </span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={practicePrev}
+              disabled={practiceIndex === 0}
+              className="rounded px-2 py-1 text-xs font-medium text-text-secondary transition-colors hover:text-text-primary disabled:opacity-30"
+            >
+              Prev
+            </button>
+            <button
+              onClick={practiceNext}
+              className="rounded bg-accent px-2 py-1 text-xs font-medium text-black transition-colors hover:bg-accent-hover"
+            >
+              {practiceIndex < items.length - 1 ? 'Next' : 'Finish'}
+            </button>
+            <button
+              onClick={exitPractice}
+              className="rounded px-2 py-1 text-xs text-text-tertiary hover:text-text-primary"
+            >
+              Exit
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="mb-6">
         {isEditing ? (
           <div className="flex items-center gap-2">
@@ -165,6 +229,17 @@ export function SetlistDetail() {
               {Math.floor(totalDuration / 60)}:{(totalDuration % 60).toString().padStart(2, '0')} total
             </span>
           )}
+          {items.length > 0 && !practiceMode && (
+            <>
+              <span>·</span>
+              <button
+                onClick={() => startPractice(0)}
+                className="font-medium text-accent hover:text-accent-hover"
+              >
+                Practice
+              </button>
+            </>
+          )}
           <span>·</span>
           <select
             value={setlist.venue_id ?? ''}
@@ -191,6 +266,7 @@ export function SetlistDetail() {
                 key={item.id}
                 item={item}
                 index={idx}
+                isActive={practiceMode && idx === practiceIndex}
                 onRemove={() => removeSong(item.id)}
                 onPlay={
                   connection?.is_premium && item.song?.spotify_track_id
@@ -253,7 +329,7 @@ export function SetlistDetail() {
   )
 }
 
-function SortableItem({ item, index, onRemove, onPlay, onBpmClick }: { item: SetlistSong; index: number; onRemove: () => void; onPlay?: () => void; onBpmClick?: (bpm: number) => void }) {
+function SortableItem({ item, index, isActive, onRemove, onPlay, onBpmClick }: { item: SetlistSong; index: number; isActive?: boolean; onRemove: () => void; onPlay?: () => void; onBpmClick?: (bpm: number) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
   const style = {
@@ -266,7 +342,7 @@ function SortableItem({ item, index, onRemove, onPlay, onBpmClick }: { item: Set
   if (!item.song) return null
 
   return (
-    <div ref={setNodeRef} style={style} className="flex items-center gap-2">
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-2 ${isActive ? 'rounded-lg ring-2 ring-amber-400/40' : ''}`}>
       <button
         {...attributes}
         {...listeners}

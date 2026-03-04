@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useMetronome } from '../lib/metronome'
 
 export function Metronome() {
-  const { bpm, setBpm, isPlaying, toggle, panelOpen, closePanel } = useMetronome()
+  const { bpm, setBpm, isPlaying, remaining, toggle, panelOpen, closePanel } = useMetronome()
   const [tapTimes, setTapTimes] = useState<number[]>([])
   const tapTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -53,6 +53,11 @@ export function Metronome() {
           <div className="mb-4 text-center">
             <span className="font-mono text-4xl font-bold text-text-primary">{bpm}</span>
             <span className="ml-1 text-sm text-text-tertiary">bpm</span>
+            {remaining !== null && (
+              <div className="mt-1 font-mono text-sm text-amber-400">
+                {Math.floor(remaining / 60)}:{(remaining % 60).toString().padStart(2, '0')} remaining
+              </div>
+            )}
           </div>
 
           <div className="mb-3 flex items-center justify-center gap-1.5">
