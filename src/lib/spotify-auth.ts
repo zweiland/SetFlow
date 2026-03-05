@@ -5,7 +5,7 @@ const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'
 const SPOTIFY_PROFILE_URL = 'https://api.spotify.com/v1/me'
 const REDIRECT_URI = import.meta.env.DEV
   ? 'http://localhost:5173/spotify/callback'
-  : `${window.location.origin}/spotify/callback`
+  : `${window.location.origin}${import.meta.env.BASE_URL}spotify/callback`
 const SCOPES = 'streaming user-read-email user-read-private'
 
 function getClientId(): string {
