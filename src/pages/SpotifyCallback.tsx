@@ -5,10 +5,12 @@ import {
   fetchSpotifyProfile,
   saveSpotifyConnection,
 } from '../lib/spotify-auth'
+import { useSpotify } from '../lib/spotify'
 
 export function SpotifyCallback() {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
+  const { refetchConnection } = useSpotify()
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -32,7 +34,10 @@ export function SpotifyCallback() {
         const tokens = await exchangeSpotifyCode(code!)
         const profile = await fetchSpotifyProfile(tokens.access_token)
         await saveSpotifyConnection(tokens, profile)
-        if (!cancelled) navigate('/', { replace: true })
+        if (!cancelled) {
+          refetchConnection()
+          navigate('/', { replace: true })
+        }
       } catch (err) {
         if (!cancelled) {
           setError(

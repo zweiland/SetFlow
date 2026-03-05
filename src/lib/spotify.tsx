@@ -32,6 +32,7 @@ interface SpotifyContextValue {
   resume: () => Promise<void>
   seek: (positionMs: number) => Promise<void>
   disconnect: () => Promise<void>
+  refetchConnection: () => void
 }
 
 const SpotifyContext = createContext<SpotifyContextValue | null>(null)
@@ -48,6 +49,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth()
   const [connection, setConnection] = useState<SpotifyConnection | null>(null)
   const [loading, setLoading] = useState(true)
+  const [fetchTrigger, setFetchTrigger] = useState(0)
   const [deviceId, setDeviceId] = useState<string | null>(null)
   const [playback, setPlayback] = useState<PlaybackState | null>(null)
   const playerRef = useRef<Spotify.Player | null>(null)
@@ -76,7 +78,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true
     }
-  }, [user])
+  }, [user, fetchTrigger])
 
   // Get a valid access token, refreshing if needed
   const getToken = useCallback(async (): Promise<string | null> => {
@@ -208,6 +210,10 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
     setConnection(null)
   }, [user])
 
+  const refetchConnection = useCallback(() => {
+    setFetchTrigger((n) => n + 1)
+  }, [])
+
   return (
     <SpotifyContext.Provider
       value={{
@@ -220,6 +226,7 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
         resume,
         seek,
         disconnect,
+        refetchConnection,
       }}
     >
       {children}
