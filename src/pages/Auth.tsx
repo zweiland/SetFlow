@@ -65,7 +65,7 @@ export function Auth() {
           <button
             onClick={() => supabase.auth.signInWithOAuth({
               provider: 'google',
-              options: { redirectTo: window.location.origin },
+              options: { redirectTo: window.location.origin + import.meta.env.BASE_URL },
             })}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-bg py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-text-tertiary"
           >
