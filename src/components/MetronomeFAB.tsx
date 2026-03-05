@@ -8,7 +8,7 @@ export function MetronomeFAB() {
   return (
     <button
       onClick={() => openPanel()}
-      className={`fixed bottom-20 right-6 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface shadow-lg transition-all hover:border-accent/30 ${
+      className={`fixed bottom-[4.5rem] right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-border bg-surface shadow-lg transition-all hover:border-accent/30 md:bottom-20 md:right-6 ${
         isPlaying ? 'ring-2 ring-amber-400/60 ring-offset-2 ring-offset-bg' : ''
       }`}
       title="Metronome"

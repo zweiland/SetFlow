@@ -36,7 +36,7 @@ export function Metronome() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
           transition={{ duration: 0.15 }}
-          className="fixed bottom-20 right-6 z-50 w-64 rounded-xl border border-border bg-surface p-4 shadow-lg"
+          className="fixed bottom-[4.5rem] right-4 z-50 w-64 rounded-xl border border-border bg-surface p-4 shadow-lg md:bottom-20 md:right-6"
         >
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs font-medium text-text-secondary">Metronome</span>
