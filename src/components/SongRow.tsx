@@ -4,6 +4,7 @@ interface SongRowProps {
   song: Song
   onClick?: () => void
   onBpmClick?: (bpm: number) => void
+  bpmColor?: string
   trailing?: React.ReactNode
 }
 
@@ -30,10 +31,11 @@ function keyColor(key: string | null): string {
   return KEY_COLORS[base] ?? 'text-text-secondary'
 }
 
-export function SongRow({ song, onClick, onBpmClick, trailing }: SongRowProps) {
+export function SongRow({ song, onClick, onBpmClick, bpmColor, trailing }: SongRowProps) {
   return (
     <div
       onClick={onClick}
+      style={bpmColor ? { borderLeftColor: bpmColor, borderLeftWidth: 3 } : undefined}
       className={`group flex items-center gap-4 rounded-lg border border-border bg-surface px-4 py-3 transition-colors ${
         onClick ? 'cursor-pointer hover:border-accent/30 hover:bg-surface' : ''
       }`}

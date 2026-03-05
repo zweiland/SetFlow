@@ -329,6 +329,13 @@ export function SetlistDetail() {
   )
 }
 
+function bpmToColor(bpm: number | null): string | undefined {
+  if (!bpm) return undefined
+  // 60 bpm → green (hue 120), 140 bpm → yellow (60), 200+ → red (0)
+  const hue = Math.max(0, Math.min(120, 120 - ((bpm - 60) / 140) * 120))
+  return `hsl(${hue}, 70%, 45%)`
+}
+
 function SortableItem({ item, index, isActive, onRemove, onPlay, onBpmClick }: { item: SetlistSong; index: number; isActive?: boolean; onRemove: () => void; onPlay?: () => void; onBpmClick?: (bpm: number) => void }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
 
@@ -362,6 +369,7 @@ function SortableItem({ item, index, isActive, onRemove, onPlay, onBpmClick }: {
         <SongRow
           song={item.song}
           onBpmClick={onBpmClick}
+          bpmColor={bpmToColor(item.song.bpm)}
           trailing={
             <div className="flex items-center gap-1">
               {onPlay && (
