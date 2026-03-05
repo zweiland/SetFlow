@@ -36,6 +36,7 @@ export function SetlistDetail() {
   const [songSearch, setSongSearch] = useState('')
   const [practiceMode, setPracticeMode] = useState(false)
   const [practiceIndex, setPracticeIndex] = useState(0)
+  const [shareStatus, setShareStatus] = useState<'idle' | 'copied'>('idle')
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -150,6 +151,20 @@ export function SetlistDetail() {
     setPracticeMode(false)
   }
 
+  async function handleShare() {
+    if (!id || !setlist) return
+    let token = setlist.share_token
+    if (!token) {
+      token = crypto.randomUUID()
+      await supabase.from('setlists').update({ share_token: token }).eq('id', id)
+      setSetlist({ ...setlist, share_token: token })
+    }
+    const url = `${window.location.origin}${import.meta.env.BASE_URL}s/${token}`
+    await navigator.clipboard.writeText(url)
+    setShareStatus('copied')
+    setTimeout(() => setShareStatus('idle'), 2000)
+  }
+
   const totalDuration = items.reduce((sum, i) => sum + (i.song?.duration ?? 0), 0)
   const existingSongIds = new Set(items.map((i) => i.song_id))
   const availableSongs = allSongs
@@ -240,6 +255,13 @@ export function SetlistDetail() {
               </button>
             </>
           )}
+          <span>·</span>
+          <button
+            onClick={handleShare}
+            className="font-medium text-accent hover:text-accent-hover"
+          >
+            {shareStatus === 'copied' ? 'Link copied!' : 'Share'}
+          </button>
           <span>·</span>
           <select
             value={setlist.venue_id ?? ''}

@@ -17,6 +17,7 @@ export function SpotifySearchPanel({ onSelect }: SpotifySearchPanelProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<SpotifyTrackResult[]>([])
   const [searching, setSearching] = useState(false)
+  const [searchError, setSearchError] = useState<string | null>(null)
   const [open, setOpen] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
 
@@ -29,11 +30,13 @@ export function SpotifySearchPanel({ onSelect }: SpotifySearchPanelProps) {
     }
     debounceRef.current = setTimeout(async () => {
       setSearching(true)
+      setSearchError(null)
       try {
         const tracks = await searchSpotifyTracks(value.trim())
         setResults(tracks)
-      } catch {
+      } catch (err) {
         setResults([])
+        setSearchError((err as Error).message || 'Search failed')
       } finally {
         setSearching(false)
       }
@@ -125,7 +128,10 @@ export function SpotifySearchPanel({ onSelect }: SpotifySearchPanelProps) {
           ))}
         </div>
       )}
-      {!searching && query && results.length === 0 && (
+      {!searching && searchError && (
+        <p className="py-2 text-center text-xs text-red-400">{searchError}</p>
+      )}
+      {!searching && !searchError && query && results.length === 0 && (
         <p className="py-2 text-center text-xs text-text-secondary">No results found.</p>
       )}
     </div>

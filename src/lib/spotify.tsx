@@ -196,17 +196,22 @@ export function SpotifyProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const disconnect = useCallback(async () => {
+    if (!user) return
+
+    const { error } = await supabase
+      .from('spotify_connections')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('Failed to disconnect Spotify:', error)
+      return
+    }
+
     playerRef.current?.disconnect()
     playerRef.current = null
     setDeviceId(null)
     setPlayback(null)
-
-    if (user) {
-      await supabase
-        .from('spotify_connections')
-        .delete()
-        .eq('user_id', user.id)
-    }
     setConnection(null)
   }, [user])
 

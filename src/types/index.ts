@@ -32,8 +32,27 @@ export interface Setlist {
   is_archived: boolean
   venue_id: string | null
   venue?: Venue
+  share_token: string | null
   created_at: string
   updated_at: string
+}
+
+export interface SharedSetlistSong {
+  position: number
+  title: string
+  artist: string | null
+  key: string | null
+  bpm: number | null
+  duration: number | null
+  spotify_image_url: string | null
+}
+
+export interface SharedSetlistData {
+  id: string
+  name: string
+  description: string | null
+  venue: { name: string; city: string | null } | null
+  songs: SharedSetlistSong[]
 }
 
 export interface SetlistSong {

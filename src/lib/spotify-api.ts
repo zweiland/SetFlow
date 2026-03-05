@@ -9,7 +9,12 @@ export async function searchSpotifyTracks(
     body: { action: 'search', query, limit },
   })
 
-  if (error) throw new Error('Spotify search failed')
+  if (error) {
+    const msg = typeof error === 'object' && error !== null && 'message' in error
+      ? (error as { message: string }).message
+      : 'Spotify search failed'
+    throw new Error(msg)
+  }
 
   const tracks = data?.tracks?.items ?? []
   return tracks.map(mapTrack)

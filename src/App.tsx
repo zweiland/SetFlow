@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { useAuth } from './lib/auth'
 import { Layout } from './components/Layout'
 import { Dashboard } from './pages/Dashboard'
@@ -6,6 +6,7 @@ import { SongLibrary } from './pages/SongLibrary'
 import { SetlistDetail } from './pages/SetlistDetail'
 import { Venues } from './pages/Venues'
 import { SpotifyCallback } from './pages/SpotifyCallback'
+import { SharedSetlist } from './pages/SharedSetlist'
 import { SpotifyPlayer } from './components/SpotifyPlayer'
 import { Metronome } from './components/Metronome'
 import { MetronomeFAB } from './components/MetronomeFAB'
@@ -13,6 +14,16 @@ import { Auth } from './pages/Auth'
 
 function App() {
   const { user, loading } = useAuth()
+  const location = useLocation()
+
+  // Public share route — no auth required
+  if (location.pathname.startsWith('/s/')) {
+    return (
+      <Routes>
+        <Route path="/s/:token" element={<SharedSetlist />} />
+      </Routes>
+    )
+  }
 
   if (loading) {
     return (
