@@ -54,9 +54,10 @@ export function SongModal({ open, onClose, onSave, song }: SongModalProps) {
   function handleSpotifySelect(track: SpotifyTrackResult) {
     setForm((f) => ({
       ...f,
-      title: track.name,
-      artist: track.artists.join(', '),
-      duration: Math.round(track.duration_ms / 1000).toString(),
+      // Only fill empty fields when editing an existing song
+      title: song && f.title ? f.title : track.name,
+      artist: song && f.artist ? f.artist : track.artists.join(', '),
+      duration: song && f.duration ? f.duration : Math.round(track.duration_ms / 1000).toString(),
       spotify_track_id: track.id,
       spotify_image_url: track.image_url ?? '',
     }))
